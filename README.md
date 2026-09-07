@@ -1,55 +1,52 @@
 # UKR Service Desk
 
-A full-stack university IT service desk application for submitting, tracking, and managing technical support tickets.
+UKR Service Desk is a full-stack IT ticket management application built with React, ASP.NET Core, Entity Framework Core, and PostgreSQL.
 
-The application provides separate workflows for users and administrators, including secure authentication, role-based authorization, ticket ownership, technician assignment, priority management, and ticket resolution.
+I built the project to work through a complete service desk workflow: users can submit and track support requests, while administrators can manage tickets, assign technicians, update priorities, and resolve requests.
 
-## Application Preview
+## Screenshots
 
 ### Login
 
-![UKR Service Desk Login](screenshots/login-page.png)
+![Login page](screenshots/login-page.png)
 
 ### User Dashboard
 
-Users can submit support requests and track the status of their tickets.
+![User dashboard](screenshots/User-dashboard.png)
 
-![UKR Service Desk User Dashboard](screenshots/User-dashboard.png)
+### Admin Dashboard
 
-### Administrator Dashboard
-
-Administrators can monitor all submitted tickets, assign technicians, update priorities and statuses, and manage service desk activity.
-
-![UKR Service Desk Administrator Dashboard](screenshots/Admin-dashboard.png)
+![Admin dashboard](screenshots/Admin-dashboard.png)
 
 ## Features
 
-### User Portal
-- Register and log in securely
-- Create IT support tickets
-- Set ticket priority
-- View personal support tickets
-- Track ticket status and technician assignment
-- Users can access only their own tickets
+### Users
 
-### Administrator Portal
-- Separate administrator dashboard
-- View tickets submitted by all users
-- View submitter name, email, and ticket creation time
+- Register and sign in
+- Submit support tickets
+- Set a ticket priority
+- View their own tickets
+- Track ticket status
+- See technician assignments
+
+### Administrators
+
+- View tickets from all users
+- See who submitted each ticket
 - Assign technicians
 - Change ticket priority
 - Mark tickets as resolved or reopen them
 - Delete tickets
 - Register additional administrators
 
-## Technology Stack
+## Tech Stack
 
 **Frontend**
 - React
 - JavaScript
-- Vite
 - React Router
-- HTML5 / CSS3
+- Vite
+- HTML/CSS
 
 **Backend**
 - C#
@@ -60,121 +57,65 @@ Administrators can monitor all submitted tickets, assign technicians, update pri
 **Database**
 - PostgreSQL
 
-**Authentication & Security**
-- JSON Web Tokens (JWT)
+**Authentication**
+- JWT Bearer authentication
 - ASP.NET Core Identity
 - Role-based authorization
-- Password hashing through ASP.NET Core Identity
-- User-based ticket ownership
-- Protected API endpoints
 
 ## Architecture
 
-The application follows a layered full-stack architecture:
+The project is split into a React frontend and an ASP.NET Core API.
 
 ```text
-React Frontend
-      │
-      │ HTTP / JSON
-      ▼
-ASP.NET Core Web API
-      │
-      ▼
-Controllers
-      │
-      ▼
-Service Layer
-      │
-      ▼
+React
+  ↓
+ASP.NET Core API
+  ↓
+Ticket Service
+  ↓
 Entity Framework Core
-      │
-      ▼
+  ↓
 PostgreSQL
 ```
 
-The React frontend communicates with the ASP.NET Core REST API using HTTP requests. Controllers handle incoming requests and delegate ticket operations to the service layer. Entity Framework Core handles database access and persistence in PostgreSQL.
+The React application calls the API for authentication and ticket operations. The API uses a service layer for ticket logic and Entity Framework Core for database access.
 
-## Authentication Flow
+Authentication is handled with ASP.NET Core Identity and JWT bearer tokens. The API uses the authenticated user's ID to determine ticket ownership and role checks to protect administrator operations.
 
-```text
-User Login
-    │
-    ▼
-ASP.NET Core Identity
-verifies credentials
-    │
-    ▼
-JWT generated
-    │
-    ▼
-React stores authentication token
-    │
-    ▼
-Token sent with protected API requests
-    │
-    ▼
-ASP.NET Core validates token and role
-    │
-    ▼
-Authorized resource returned
+## Authorization
+
+There are two roles in the application: `User` and `Admin`.
+
+A normal user can only access tickets associated with their own user ID. The backend gets that ID from the authenticated user's JWT rather than accepting a user ID from the frontend.
+
+Admin-only operations are protected on the API using role-based authorization.
+
+For example:
+
+```csharp
+[Authorize(Roles = "Admin")]
 ```
 
-The backend determines ticket ownership using the authenticated user's ID from the JWT rather than trusting a user ID supplied by the frontend.
+This is used for operations such as deleting tickets and performing administrator ticket updates.
 
-Administrator endpoints are protected using role-based authorization.
+## Main API Endpoints
 
-## Ticket Workflow
-
-```text
-User creates ticket
-        │
-        ▼
-Ticket stored in PostgreSQL
-        │
-        ▼
-Administrator reviews ticket
-        │
-        ├── Assign technician
-        ├── Update priority
-        └── Update status
-                │
-                ▼
-          Ticket resolved
-```
-
-## API Examples
-
-| Method | Endpoint | Purpose |
-|---|---|---|
+| Method | Endpoint | Description |
+| --- | --- | --- |
 | POST | `/api/auth/register` | Register a user |
-| POST | `/api/auth/login` | Authenticate and receive JWT |
-| POST | `/api/auth/register-admin` | Register an administrator |
-| GET | `/api/tickets` | Retrieve authorized tickets |
-| GET | `/api/tickets/{id}` | Retrieve a ticket |
+| POST | `/api/auth/login` | Sign in |
+| POST | `/api/auth/register-admin` | Register another admin |
+| GET | `/api/tickets` | Get tickets available to the current user |
+| GET | `/api/tickets/{id}` | Get a ticket by ID |
 | POST | `/api/tickets` | Create a ticket |
 | PUT | `/api/tickets/{id}` | Update a ticket |
-| PUT | `/api/tickets/{id}/admin` | Administrator ticket management |
-| DELETE | `/api/tickets/{id}` | Delete a ticket (Admin) |
-
-## Security Design
-
-The application includes several backend security controls:
-
-- Passwords are managed and hashed through ASP.NET Core Identity.
-- JWT Bearer authentication protects API resources.
-- Role claims distinguish users from administrators.
-- Administrative endpoints require the `Admin` role.
-- Ticket ownership is derived from the authenticated user's JWT claims.
-- Users cannot retrieve or modify another user's tickets.
-- Secrets such as database credentials and JWT signing keys are kept outside source control.
-
-Frontend route protection improves the user experience, while authorization is enforced independently by the backend API.
+| PUT | `/api/tickets/{id}/admin` | Admin ticket update |
+| DELETE | `/api/tickets/{id}` | Delete a ticket |
 
 ## Project Structure
 
 ```text
 ukr-service-desk/
-│
 ├── CampusTech.Api/
 │   ├── Controllers/
 │   ├── Data/
@@ -192,79 +133,46 @@ ukr-service-desk/
 │       ├── main.jsx
 │       └── styles.css
 │
+├── screenshots/
 └── README.md
 ```
 
-## Running the Project Locally
-
-### Prerequisites
-
-- .NET SDK
-- PostgreSQL
-- Node.js and npm
+## Running Locally
 
 ### Backend
 
-Configure the PostgreSQL connection string and JWT signing key using .NET User Secrets.
+The backend requires a PostgreSQL connection string and JWT signing key.
 
-Then:
+I keep these outside the repository using .NET User Secrets.
+
+From `CampusTech.Api`:
 
 ```bash
-cd CampusTech.Api
 dotnet restore
 dotnet ef database update
 dotnet run
 ```
 
-The development API is configured to run locally.
-
 ### Frontend
 
-In another terminal:
+From `ukr-service-desk-ui`:
 
 ```bash
-cd ukr-service-desk-ui
 npm install
 npm run dev
 ```
 
-Open the local URL displayed by Vite in your browser.
+The frontend is configured to communicate with the ASP.NET Core API during local development.
 
-> Database credentials, JWT signing keys, and demo account passwords are intentionally not included in this repository.
+## Notes
 
-## What I Built
+- Passwords are handled by ASP.NET Core Identity.
+- Database credentials and JWT signing keys are not committed to the repository.
+- EF Core migrations are included in the backend project.
+- Ticket creation timestamps are stored in UTC and displayed in the UI using Central Time.
 
-This project was developed as an end-to-end full-stack application, including:
+## Demo
 
-- Relational data modeling with Entity Framework Core
-- PostgreSQL database integration and migrations
-- REST API design with ASP.NET Core
-- Service-layer architecture and dependency injection
-- ASP.NET Core Identity integration
-- JWT authentication
-- User and administrator role authorization
-- Resource-level ticket ownership authorization
-- React component and state management
-- API integration between React and ASP.NET Core
-- Responsive user and administrator interfaces
-- Error handling and protected application routes
+A separate project page with screenshots and short recordings of the user and admin workflows is available here:
 
-## Future Enhancements
-
-Potential future improvements include:
-
-- Ticket search and filtering
-- Pagination
-- Email notifications
-- File attachments
-- Automated testing
-- Docker containerization
-- Cloud deployment
-- Audit logging
-
-## Author
-
-**Kavya Rao**
-
-M.S. Computer Science  
-Full-Stack Software Development
+**[UKR Service Desk Project Demo](https://kavyaraom.github.io/ukr-service-desk-website/)**
