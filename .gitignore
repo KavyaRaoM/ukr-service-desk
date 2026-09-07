@@ -1,0 +1,27 @@
+# .NET generated files
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# React / Node generated files
+node_modules/
+dist/
+
+# Environment / secret files
+.env
+.env.*
+!.env.example
+secrets.json
+appsettings.Local.json
+
+# macOS
+.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log

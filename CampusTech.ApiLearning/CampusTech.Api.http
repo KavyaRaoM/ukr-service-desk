@@ -1,0 +1,13 @@
+@CampusTech.Api_HostAddress = http://localhost:5072
+
+POST {{CampusTech.Api_HostAddress}}/api/tickets
+Content-Type: application/json
+
+{
+  "id": 104,
+  "title": "Printer not working",
+  "description": "Printer is showing an offline error.",
+  "priority": 3,
+  "isResolved": false,
+  "technician": null
+}
