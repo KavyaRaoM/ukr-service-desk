@@ -23,10 +23,8 @@ public class TicketService : ITicketService
 //Create a new Ticket
     public async Task<Ticket> AddAsync(Ticket ticket)
     {
-        _context.Tickets.Add(ticket); //EF Core starts tracking new Ticket
-
-        await _context.SaveChangesAsync(); //EF Core generates INSERT
-                                        //Add() alone doesn't actually save the row to PostgreSQL. This line is critical:
+        _context.Tickets.Add(ticket); 
+        await _context.SaveChangesAsync();
 
         return ticket;
     }
@@ -86,7 +84,7 @@ public class TicketService : ITicketService
             .ToListAsync();
     }
      
-     public async Task<bool> AdminUpdateAsync(
+    public async Task<bool> AdminUpdateAsync(
     int id,
     AdminUpdateTicketDto dto)
     {
