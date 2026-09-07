@@ -25,3 +25,6 @@ appsettings.Local.json
 
 # Logs
 *.log
+
+CampusTech.ApiLearning/
+CampusTech.Domain/
